@@ -12,12 +12,14 @@ import java.util.UUID;
 public class Condutor {
 
     @Id
-    private UUID id;
+    private String id;
     private String nome;
+    @DBRef
     private Endereco endereco;
     private String telefone;
+    private String email;
     private FormaDePagamento formaDePagamento;
     @DBRef
-    private List<Veiculo> veiculos;
+    private Veiculo veiculo;
 
 }

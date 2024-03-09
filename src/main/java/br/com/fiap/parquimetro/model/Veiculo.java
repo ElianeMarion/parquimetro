@@ -9,9 +9,11 @@ import java.util.UUID;
 @Data
 public class Veiculo {
     @Id
-    private UUID id;
+    private String id;
 
    private String placa;
+   private String marca;
+   private String modelo;
 
 
 }

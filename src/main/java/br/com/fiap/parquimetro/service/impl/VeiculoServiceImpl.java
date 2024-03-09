@@ -27,7 +27,7 @@ public class VeiculoServiceImpl implements VeiculoService {
     }
 
     @Override
-    public Veiculo buscarPorCodigo(UUID id) {
+    public Veiculo buscarPorCodigo(String id) {
         return this.veiculoRepository.findById(id).orElseThrow(
                 ()-> new IllegalArgumentException("Veículo não encontrado"));
     }

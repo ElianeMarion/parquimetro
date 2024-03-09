@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface VeiculoService {
     public List<Veiculo> obterTodos();
-    public Veiculo buscarPorCodigo(UUID id);
+    public Veiculo buscarPorCodigo(String id);
     public Veiculo criar(Veiculo veiculo);
 
 }

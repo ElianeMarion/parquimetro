@@ -20,12 +20,12 @@ public class VeiculoController {
     }
 
     @GetMapping("/{id}")
-    public Veiculo buscarPorCodigo(@PathVariable UUID id) {
+    public Veiculo buscarPorCodigo(@PathVariable String id) {
         return this.veiculoService.buscarPorCodigo(id);
     }
 
     @PostMapping
-    public Veiculo criar(Veiculo veiculo){
+    public Veiculo criar(@RequestBody  Veiculo veiculo){
         return this.veiculoService.criar(veiculo);
     }
 
