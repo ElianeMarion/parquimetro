@@ -15,15 +15,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class EstacionamentoServiceImpl implements EstacionamentoService {
+
+    @Autowired
+    private MongoTransactionManager transactionManager;
 
     @Autowired
     private EstacionamentoRepository repository;
@@ -94,7 +100,7 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
 
         }
     }
-
+    @Transactional
     @Override
     public ResponseEntity<?> finalizarEstacionamento(String id) {
         try{
@@ -107,8 +113,12 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
                 estacionamento.setHorarioSaida(horaAtual);
                 estacionamento.calcularPeriodo();
                 estacionamento.setValor(calculo.calcularTarifa(estacionamento));
-                estacionamento.setPago(true);
-                estacionamento.setAtivo(false);
+
+                if(estacionamento.isPago()){
+                    estacionamento.setPago(true);
+                    estacionamento.setAtivo(false);
+                }
+
                 this.repository.save(estacionamento);
                 return ResponseEntity.status(HttpStatus.OK).build();
             }
@@ -125,6 +135,27 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
         Pageable paginacao = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         return this.repository.findAll(paginacao);
     }
+    @Transactional
+   @Override
+    public ResponseEntity<?> fiscalizar(@PathVariable String id) {
+        try{
+            Calculo calculo = new Calculo();
+            Estacionamento estacionamento = repository.findById(id).orElseThrow(null);
+            if(estacionamento == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cadastro não encontrado");
+            }else {
+                LocalDateTime horaAtual = LocalDateTime.now();
+                if (estacionamento.verificarPeriodoFiscalizacao(horaAtual))
+                    return ResponseEntity.status(HttpStatus.OK).body("Dentro do período contratado");
+                else
+                    return ResponseEntity.status(HttpStatus.OK).body("Fora do período contratado");
 
+            }
+        }catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao atualizar estacionamento: " + ex.getMessage());
 
+        }
+
+    }
 }

@@ -34,4 +34,9 @@ public class EstacionamentoController {
     public ResponseEntity<?> finalizarEstacionamento(@PathVariable String id) {
         return this.estacionamentoService.finalizarEstacionamento(id);
     }
+
+    @GetMapping("/fiscalizacao/{id}")
+    public ResponseEntity<?> fiscalizar(@PathVariable String id) {
+        return this.estacionamentoService.fiscalizar(id);
+    }
 }

@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
+
 public class EnderecoServiceImpl implements EnderecoService {
 
     @Autowired
@@ -24,6 +27,11 @@ public class EnderecoServiceImpl implements EnderecoService {
         return this.enderecoRepository.findById(id).orElseThrow(
                 ()-> new IllegalArgumentException("Endereço não cadastrado.")
         );
+    }
+
+    @Override
+    public List<Endereco> listar() {
+        return this.enderecoRepository.findAll();
     }
 
     @Override

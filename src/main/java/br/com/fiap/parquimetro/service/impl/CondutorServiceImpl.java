@@ -9,15 +9,20 @@ import br.com.fiap.parquimetro.repository.VeiculoRepository;
 import br.com.fiap.parquimetro.service.CondutorService;
 import br.com.fiap.parquimetro.service.EnderecoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
 @Service
 public class CondutorServiceImpl implements CondutorService {
+
+    @Autowired
+    private MongoTransactionManager transactionManager;
 
     @Autowired
     private CondutorRepository condutorRepository;
@@ -26,7 +31,7 @@ public class CondutorServiceImpl implements CondutorService {
     private VeiculoRepository veiculoRepository;
 
     @Autowired
-    private EnderecoServiceImpl endereco;
+    private EnderecoRepository enderecoRepository;
 
     private final MongoTemplate mongoTemplate;
 
@@ -56,10 +61,10 @@ public class CondutorServiceImpl implements CondutorService {
     public ResponseEntity<String> cadastrar(Condutor condutor) {
         Endereco end = new Endereco();
         if(condutor.getEndereco().getId() != null){
-            end = this.endereco.buscarPorId(condutor.getEndereco().getId());
+            end = this.enderecoRepository.findById(condutor.getEndereco().getId()).orElse(null);
 
             if(end.getId() == null)
-                end = this.endereco.cadastrar(condutor.getEndereco());
+                end = this.enderecoRepository.save(condutor.getEndereco());
             condutor.setEndereco(end);
             //
         }else{
@@ -80,6 +85,27 @@ public class CondutorServiceImpl implements CondutorService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao cadastrar condutor: " + ex.getMessage());
         }
+    }
+
+    @Override
+    public ResponseEntity<String> cadastrarCondutorComEndereco(Condutor condutor, Endereco endereco) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.execute((status -> {
+            try{
+                enderecoRepository.save(endereco);
+                condutor.setEndereco(endereco);
+                condutorRepository.save(condutor);
+                return ResponseEntity.status(HttpStatus.CREATED).build();
+            }catch (Exception e){
+                //tratar erro e lançar a transaçao de volta
+                status.setRollbackOnly(); //desfazer tudo o que foi feito antes de lançar exceção
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Erro ao cadastrar condutor: " + e.getMessage());
+            }
+
+        }));
+        return null;
     }
 
 }

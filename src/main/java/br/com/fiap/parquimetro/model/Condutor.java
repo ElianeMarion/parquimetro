@@ -1,5 +1,6 @@
 package br.com.fiap.parquimetro.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -13,6 +14,7 @@ public class Condutor {
 
     @Id
     private String id;
+    @NotBlank(message = "O nome é obrigatório")
     private String nome;
     @DBRef
     private Endereco endereco;

@@ -32,20 +32,34 @@ public class Estacionamento {
     @Version
     private Long version;
 
-    public void   calcularPeriodo() {
-        String tempoTotalContratado;
+    public boolean verificarPeriodoFiscalizacao(LocalDateTime horarioAtual) {
+
+        if (horarioEntrada != null && horarioAtual != null) {
+            // Calcular a diferença entre os horários de entrada e saída
+            Duration duracao = Duration.between(horarioEntrada, horarioAtual);
+            // Converter a diferença para minutos
+            long segundos = duracao.toSeconds();
+            long minutos = (segundos % 3600) / 60;
+
+            if(this.duracaoContratada * 60 <= minutos)
+                return true;
+        }
+        return false;
+    }
+
+    public int calcularPeriodo() {
+
         if (horarioEntrada != null && horarioSaida != null) {
             // Calcular a diferença entre os horários de entrada e saída
             Duration duracao = Duration.between(horarioEntrada, horarioSaida);
             // Converter a diferença para minutos
-
             long segundos = duracao.toSeconds();
             long horas = segundos / 3600;
             long minutos = (segundos % 3600) / 60;
             long segundosFinais = segundos % 60;
             // Definir a duração contratada
-            this.duracaoContratada = (int) minutos;
+            return (int) minutos;
         }
-
+        return 0;
     }
 }

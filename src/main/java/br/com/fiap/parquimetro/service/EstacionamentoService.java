@@ -17,5 +17,7 @@ public interface EstacionamentoService {
 
     public ResponseEntity<?> finalizarEstacionamento(String id);
 
+    public ResponseEntity<?> fiscalizar(String id);
+
 
 }
